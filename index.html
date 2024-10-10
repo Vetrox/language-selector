@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Earth</title>
+    <!-- Three.js CDN (UMD build for global THREE, r128 is stable for global OrbitControls) -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <!-- OrbitControls UMD build attaches to global THREE -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+    <!-- lil-gui CDN (if needed, but not used in your code) -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/lil-gui@0.18.0/dist/lil-gui.min.js"></script> -->
+  </head>
+  <style>
+    body {
+      margin: 0;
+      background: #181818;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .card-container {
+      background: #232323;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 110px;
+      height: 80px;
+      position: relative;
+    }
+    .earth-row {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      flex: 0 0 auto;
+    }
+    #earth-canvas-container {
+      width: 56px;
+      height: 56px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .tilt-btn {
+      background: #333;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: 12px;
+      opacity: 0.85;
+      transition: background 0.2s;
+      cursor: pointer;
+      user-select: none;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      margin: 0 2px;
+      flex: 0 0 auto;
+    }
+    #container canvas {
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
+    }
+    .language-display {
+      width: 100%;
+      text-align: center;
+      font-size: 11px;
+      color: #fff;
+      text-shadow: 0 1px 2px #000;
+      pointer-events: none;
+      font-family: monospace;
+      margin-top: 2px;
+      margin-bottom: 2px;
+      flex: 0 0 auto;
+      min-height: 14px;
+    }
+  </style>
+  <body>
+    <div class="card-container">
+      <div class="earth-row">
+        <button id="tiltUp" class="tilt-btn" title="Tilt Down">&#8595;</button>
+        <div id="earth-canvas-container">
+          <div id="container"></div>
+        </div>
+        <button id="tiltSide" class="tilt-btn" title="Tilt Side">&#8594;</button>
+      </div>
+      <div id="languageDisplay" class="language-display">Select language</div>
+    </div>
+    <script src="main.js"></script>
+  </body>
+</html>
