@@ -69,31 +69,13 @@ const lightsMat = new THREE.MeshBasicMaterial({
 const lightsMesh = new THREE.Mesh(geometry, lightsMat);
 earthGroup.add(lightsMesh);
 
-// Remove cloud layer
-// const cloudsMat = new THREE.MeshStandardMaterial({
-//   map: loader.load("./textures/04_earthcloudmap.jpg"),
-//   transparent: true,
-//   opacity: 0.8,
-//   blending: THREE.AdditiveBlending,
-//   alphaMap: loader.load('./textures/05_earthcloudmaptrans.jpg'),
-// });
-// const cloudsMesh = new THREE.Mesh(geometry, cloudsMat);
-// cloudsMesh.scale.setScalar(1.002);
-// earthGroup.add(cloudsMesh);
-
-// Remove glow/fresnel effect (atmosphere)
-//// const fresnelMat = getFresnelMat();
-//// const glowMesh = new THREE.Mesh(geometry, fresnelMat);
-//// glowMesh.scale.setScalar(1.01);
-//// earthGroup.add(glowMesh);
-
 // Add directional light (simulating the sun)
-const sunLight = new THREE.DirectionalLight(0xffffff, 1.1); // Lower intensity
+const sunLight = new THREE.DirectionalLight(0xffffff, 0.9); // Lower intensity
 sunLight.position.set(-2, 0.5, 1.5);
 scene.add(sunLight);
 
 // Add ambient light to brighten shadows
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.28); // Lower intensity
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.48); // Lower intensity
 scene.add(ambientLight);
 
 // Add tilt controls for buttons
