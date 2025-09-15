@@ -1,4 +1,4 @@
-# 🌍Language-selector
+# 🌍 Language-selector
 Based on [Earth - 3D Visualization Project](https://your-netlify-link-here.netlify.app/)
 
 ![Preview](preview.gif)

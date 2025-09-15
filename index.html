@@ -88,6 +88,36 @@
       margin-bottom: 2px;
       flex: 0 0 auto;
       min-height: 14px;
+      position: relative;
+      display: inline-block;
+      transition: none;
+      overflow: visible;
+    }
+    .slide-fade-out {
+      animation: slideFadeOut 0.1s forwards;
+    }
+    @keyframes slideFadeOut {
+      from {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+    }
+    .slide-fade-in {
+      animation: slideFadeIn 0.1s forwards;
+    }
+    @keyframes slideFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
   <body>

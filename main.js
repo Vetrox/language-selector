@@ -96,21 +96,7 @@ scene.add(sunLight);
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.28); // Lower intensity
 scene.add(ambientLight);
 
-// Remove GUI and params for tilt and glow scale
-// const gui = new GUI();
-// const params = {
-//   tiltAngle: -23.4,
-//   glowScale: 1.01,
-// };
-// gui.add(params, 'tiltAngle', -90, 90).name('Planet Tilt').onChange(function(value) {
-//   earthGroup.rotation.z = -value * Math.PI / 180;
-// });
-// gui.add(params, 'glowScale', 1.01, 1.05).step(0.01).name('Glow Scale').onChange(function(value) {
-//   glowMesh.scale.setScalar(value);
-// });
-
 // Add tilt controls for buttons
-// Multiply tiltStep by 40 for much faster tilting
 const tiltStep = 5 * 40; // degrees per second
 
 let tiltUpActive = false;
@@ -122,45 +108,29 @@ function tiltAroundAxis(axis, angleRad) {
   earthGroup.quaternion.premultiply(q);
 }
 
-// Update tilt button selectors for new layout
 const tiltUpBtn = document.getElementById('tiltUp');
 const tiltSideBtn = document.getElementById('tiltSide');
 
-tiltUpBtn.addEventListener('mouseenter', () => { tiltUpActive = true; });
-tiltUpBtn.addEventListener('mouseleave', () => { tiltUpActive = false; });
-tiltSideBtn.addEventListener('mouseenter', () => { tiltSideActive = true; });
-tiltSideBtn.addEventListener('mouseleave', () => { tiltSideActive = false; });
+tiltUpBtn.addEventListener('mouseenter', () => { tiltUpActive = true; setTimeout(() => { unsetLanguageText();}, 1); });
+tiltUpBtn.addEventListener('mouseleave', () => { tiltUpActive = false; setTimeout(() => { updateLangDisplay();}, 100); });
+tiltSideBtn.addEventListener('mouseenter', () => { tiltSideActive = true; setTimeout(() => { unsetLanguageText();}, 1); });
+tiltSideBtn.addEventListener('mouseleave', () => { tiltSideActive = false; setTimeout(() => { updateLangDisplay();}, 100); });
 
 let lastTime = performance.now();
 
-// Use the language display inside the card
-const languageDiv = document.getElementById('languageDisplay');
-languageDiv.textContent = "Select language";
-// Remove all manual positioning and centering, rely on table-cell CSS
-languageDiv.style.marginTop = "";
-languageDiv.style.position = "";
-languageDiv.style.left = "";
-languageDiv.style.bottom = "";
-languageDiv.style.width = "";
-languageDiv.style.textAlign = "";
-languageDiv.style.fontSize = "";
-languageDiv.style.color = "";
-languageDiv.style.textShadow = "";
-languageDiv.style.pointerEvents = "";
-languageDiv.style.fontFamily = "";
+let requestId = -1;
+setLanguageText("Select language", -1);
 
 let lastLangQuery = { lat: null, lon: null };
 let lastLangResult = "";
-let currentLangAbortController = null;
 let langLookupTimeout = null;
 let lastCoordsForLang = { lat: null, lon: null };
 
-async function fetchCountryCode(lat, lon, abortSignal) {
+async function fetchCountryCode(lat, lon) {
   const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=5&addressdetails=1`;
   try {
     const resp = await fetch(url, {
-      headers: { 'Accept-Language': 'en' },
-      signal: abortSignal
+      headers: { 'Accept-Language': 'en' }
     });
     if (!resp.ok) return null;
     const data = await resp.json();
@@ -174,11 +144,11 @@ async function fetchCountryCode(lat, lon, abortSignal) {
   }
 }
 
-async function fetchMainLanguage(countryCode, abortSignal) {
+async function fetchMainLanguage(countryCode) {
   // Use REST Countries API v3.1
   const url = `https://restcountries.com/v3.1/alpha/${countryCode}`;
   try {
-    const resp = await fetch(url, { signal: abortSignal });
+    const resp = await fetch(url);
     if (!resp.ok) return null;
     const data = await resp.json();
     if (Array.isArray(data) && data[0] && data[0].languages) {
@@ -194,37 +164,43 @@ async function fetchMainLanguage(countryCode, abortSignal) {
 }
 
 function updateLanguage(lat, lon) {
-  // Only fetch if coordinates changed significantly
+  let token = ++requestId;
   if (
     lastLangQuery.lat !== null &&
-    Math.abs(lat - lastLangQuery.lat) < 0.2 &&
-    Math.abs(lon - lastLangQuery.lon) < 0.2
+    Math.abs(lat - lastLangQuery.lat) < 2 &&
+    Math.abs(lon - lastLangQuery.lon) < 2
   ) {
-    languageDiv.textContent = lastLangResult || "Select language";
+    setLanguageText(lastLangResult || "Select language", token);
     return;
   }
   lastLangQuery = { lat, lon };
-
-  // Abort previous request if any
-  if (currentLangAbortController) {
-    currentLangAbortController.abort();
-  }
-  currentLangAbortController = new AbortController();
-
-  // Show placeholder/loading text
-  languageDiv.textContent = "Select language";
-  fetchCountryCode(lat, lon, currentLangAbortController.signal).then(countryCode => {
+  fetchCountryCode(lat, lon).then(countryCode => {
     if (!countryCode) {
-      languageDiv.textContent = "Select language";
-      lastLangResult = "";
+      setLanguageText("Select language", token);
+      lastLangResult = "Select language";
       return;
     }
-    fetchMainLanguage(countryCode, currentLangAbortController.signal).then(language => {
+    fetchMainLanguage(countryCode).then(language => {
       if (language === null) return; // Aborted or not found
-      lastLangResult = language || "";
-      languageDiv.textContent = lastLangResult || "Select language";
+      lastLangResult = language || "Select language";
+      setLanguageText(lastLangResult, token);
     });
   });
+}
+
+
+function setLanguageText(newText, token) {
+  if (token != requestId) {
+    return;
+  }
+  languageDisplay.textContent = newText;
+  languageDisplay.classList.remove('slide-fade-out');
+  languageDisplay.classList.add('slide-fade-in');
+}
+
+function unsetLanguageText() {
+  languageDisplay.classList.remove('slide-fade-in');
+  languageDisplay.classList.add('slide-fade-out');
 }
 
 function getCenterLatLon() {
@@ -251,18 +227,14 @@ function getCenterLatLon() {
 function updateLangDisplay() {
   const { lat, lon } = getCenterLatLon();
 
-  // Debounce language lookup: only trigger if view is still for 500ms
+  // Debounce language lookup
   if (
     lastCoordsForLang.lat === null ||
     Math.abs(lat - lastCoordsForLang.lat) > 0.01 ||
     Math.abs(lon - lastCoordsForLang.lon) > 0.01
   ) {
     lastCoordsForLang = { lat, lon };
-    if (langLookupTimeout) clearTimeout(langLookupTimeout);
-    languageDiv.textContent = "Select language";
-    langLookupTimeout = setTimeout(() => {
-      updateLanguage(lat, lon);
-    }, 500);
+    updateLanguage(lat, lon);
   }
 }
 
@@ -288,7 +260,6 @@ function animate() {
 
   controls.update();
   renderer.render(scene, camera);
-  updateLangDisplay();
 }
 
 // Handle window resizing for card layout
